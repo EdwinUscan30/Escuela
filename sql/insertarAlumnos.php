@@ -2,17 +2,40 @@
 require_once('../config/conexion.php');
 
 
-$nombre = $_POST['nombre'];
-$apellidoP = $_POST['apellidoP'];
+$objeto = new Conexion();
+$conexion = $objeto->Conectar();
 
-try {
-    $stmt = $conexion->prepare("INSERT INTO talumnos (nombre, apellidoP) VALUES (:nombre, :apellidoP)");
-    $stmt->bindParam(':nombre', $nombre);
-    $stmt->bindParam(':apellidoP', $apellidoP);
-    $stmt->execute();
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $nombre = $_POST["nombre"];
+    $apellidoP = $_POST["apellidoP"];
+    $apellidoM = $_POST["apellidoM"];
+    $nacimiento = $_POST["nacimiento"];
+    $curp = $_POST["curp"];
 
-    echo "Datos insertados correctamente";
-} catch(PDOException $e) {
-    echo "Error al insertar datos: " . $e->getMessage();
+    $sql = "INSERT INTO talumnos (nombre, apellidoP, apellidoM, nacimiento, curp) 
+            VALUES (:nombre, :apellidoP, :apellidoM, :nacimiento, :curp)";
+    $sentencia = $conexion->prepare($sql);
+
+    $sentencia->bindParam(":nombre", $nombre);
+    $sentencia->bindParam(":apellidoP", $apellidoP);
+    $sentencia->bindParam(":apellidoM", $apellidoM);
+    $sentencia->bindParam(":nacimiento", $nacimiento);
+    $sentencia->bindParam(":curp", $curp);
+
+    $response = array(); // Array para almacenar la respuesta
+
+    if ($sentencia->execute()) {
+        $response['success'] = true;
+        $response['message'] = "Los datos se han agregado correctamente";
+    } else {
+        $response['success'] = false;
+        $response['message'] = "Error al agregar los datos";
+    }
+
+    printgit json_encode($response, JSON_UNESCAPED_UNICODE);
 }
+
+$conexion = null;
+
+
 ?>
